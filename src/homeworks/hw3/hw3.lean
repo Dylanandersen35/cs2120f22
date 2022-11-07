@@ -52,7 +52,9 @@ See how the English presents the "story" of the formal proof in more
 natural, human, terms.
 
 ANSWER HERE:
--/
+If every person is mortal, and Socrates is a person, then Socrates must be mortal.
+This follows the all elimination and universal specialization rules.
+-/ 
 
 
 /- #2: English to Logic 
@@ -71,22 +73,22 @@ To do so, uncomment the following block of expressions then fill
 in blanks to complete this task.
 -/
 
-/- Uncomment this block to answer the question
-variable Person : Type
-variable Likes : _        -- a predicate with two Person arguments
-variable Jealous : _      -- same thing here  
+-- Uncomment this block to answer the question
+--variable Person : Type
+/-variable Likes : Person → Person → Prop        -- a predicate with two Person arguments
+variable Jealous : Person → Person → Prop      -- same thing here  
 variable Triangle :       -- note definition extends to next line
-  ∀ (p1 p2 p3 : Person), _  
-variables ed hannah mel : _
-variable likes_ed_hannah : _
-variable likes_hannah_mel : _
+  ∀ (p1 p2 p3 : Person), p1 → p2 → Likes, p2 → p3 → Likes, p1 → p3 → Jealous  
+variables ed hannah mel : Person
+variable likes_ed_hannah : Likes ed hannah
+variable likes_hannah_mel : Likes hannah mel
 -- Finally write and use #check to check an expression that proves that ed is 
 -- jealous of mel.
 -- To ANSWER, fill in the _ with your expression. 
 -- HINT "Apply" what you know.
--/
 
-#check _
+
+#check Triangle
 
 
 /- #3: Proofing a propositions involving ∀ and ∨
@@ -95,12 +97,16 @@ Write an English-language  proof of the following proposition, using
 the methods of inference we've covered: ∀ (P Q : Prop), P ∧ Q → Q ∨ P. 
 
 Do read that proposition carefully, please. You don't need to write a
-long proof. Keep it concise. Identiy the inference rules you use.
+long proof. Keep it concise. Identify the inference rules you use.
 
+The proposition is valid because the statement can never be false. If P and Q
+is false then Q or P can be true or false, which will result in a true statement.
+If P and Q is true then Q or P will always be true, which will also result in a 
+true statement. The inference rule used is all elimination.
 -/
 
 
-/- 
+
 Model the following logic story formally. Everyone knows someone who 
 knows someone who knows everyone.
 
