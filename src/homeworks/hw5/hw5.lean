@@ -24,7 +24,9 @@ State and prove the proposition that there's some
 natural number whose square is 144.
 -/
 
-example : _ := _
+def square (n : ℕ) := n * n
+def squares (n m : ℕ) : Prop := square n = m
+example : squares 12 144 := rfl
 
 
 /- #1B.
@@ -35,7 +37,7 @@ for string.append, the function for gluing two
 strings together into one.
 -/
 
-example : _ := _
+example : (∃ (s : "I love logic")) := s ++ "!"
 
 /- #1C.
 
@@ -46,8 +48,13 @@ takes just one witness as a time, so you will
 have to apply it more than once.
 -/
 
-example : _ :=
+def pyth (x y z : ℕ) := x*x + y*y = z*z
+example : ∃ (x y z : ℕ), pyth x y z :=
 begin
+assume X Y Z,
+apply exists.intro x
+apply exists.intro y
+apply exists.intro z
 end
 
 /- #1D
@@ -56,17 +63,21 @@ three natural number arguments, x, y, and z,
 yielding the proposition that x*x + y*y = z*z.
 -/
 
-def pythag_triple (x y z : ℕ) := _
+def pythag_triple (x y z : ℕ) := x*x + y*y = z*z
 
 /- #1E
-State the propositionthat there exist x, y, z, 
+State the proposition that there exist x, y, z, 
 natural numbers, that satisfy the pythag_triple, 
 predicate, then prove it. (Use "example : ...")
 -/
 
-example : _  :=
+example : ∃ (x y z : ℕ),
 begin
-_
+unfold pythag_triple,
+apply exists.intro 3,
+apply exists.intro 4,
+apply exists.intro 5,
+exact rfl,
 end
 
 /- #2A
@@ -137,9 +148,11 @@ in the English language proof below.
 
 example (n m k : ℕ) : n + (m + k) = (n + k) + m := 
 begin 
-ring 
+ring,
 end  
--- Enlish proof (it's short!): 
+-- Enlish proof (it's short!): ℕ is addition associative. To start, we must unfold
+-- it and then we can see that ℕ is addition associative as both are the same, using
+-- ring.
 
 /-
 Whoa! It's so easy to prove addition associative? 
@@ -185,9 +198,13 @@ has to be. Also, be sure to use multiple_of in
 formally stating the proposition to be proved.
 -/
 
-example : _ :=
+example : ∃ (x y : ℕ), multiple_of x y :=
 begin
-_
+unfold multiple_of,
+apply exists.intro 12,
+apply exists.intro 6,
+apply exists.intro 2,
+exact rfl,
 end 
 
 
@@ -211,9 +228,13 @@ that you can replace equals by equals without
 changing the truth values of propositions. 
 -/
 
-example (n h k : ℕ) : _ :=
+example (n h k : ℕ) : (n * h = h * k) :=
 begin
-_
+ring_nf,
+apply exists.intro 2,
+apply exists.intro 3,
+apply exists.intro 4,
+exact rfl,
 end
 
 
@@ -237,9 +258,12 @@ example
   (isCool : Person → Prop)
   (LogicMakesCool : ∀ (p), KnowsLogic p → isCool p)
   (SomeoneKnowsLogic : ∃ (p), KnowsLogic p) :
-  _ :=
+  (∃ (p : Person), isCool p) :=
 begin
-_
+  assume h,
+  cases h with p lc,
+  cases lc with logic cool,
+  exact exists.intro p cool,
 end
 
 
@@ -252,10 +276,14 @@ someone is not happy then not everyone is happy.
 example 
   (Person : Type)
   (Happy : Person → Prop) :
-  _
+  (∃ (p : Person), ¬Happy p)
   :=
 begin
-  _
+  --apply exists.intro,
+  assume h,
+  cases h with p,
+  cases nh with notHappy,
+  apply exists.intro p notHappy,
 end
 
 /- #3C
@@ -278,8 +306,14 @@ your set of assumptions.
 example 
   (α : Type)
   (P : α → Prop) :
-  _ :=
+  (∃ (p : α), P p) ↔  
+  (¬∃ (q : α), ¬P q) :=
 begin
+  apply exists.intro,
+  assume h,
+  contradiction,
+  apply exists.intro,
+  exact p,
 end 
 
 
@@ -297,13 +331,15 @@ taking objects of that type.
 example 
   (T : Type)
   (P : T → Prop) :
-  _ :=
+  (¬∃ (t : T), ¬P t) :=
 begin
-_
+  apply exists.intro,
+  assume h,
+  exact P,
 end
 
 
-/- #3D
+/- #3E
 Formally state and prove the proposition
 that if there's an object with the property 
 of having property P or property Q then 
@@ -315,7 +351,11 @@ example
   (α : Type)
   (P : α → Prop)
   (Q : α → Prop): 
-  _ :=
+  (∃ (p : α), P ∨ Q p) :=
 begin
+  ring,
+  apply exists.intro,
+  assume h,
+  exact p,
 end
 
