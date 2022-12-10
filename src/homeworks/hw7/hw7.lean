@@ -12,6 +12,11 @@ English language proof.
 
 example (α : Type) (P : α → Prop) : (∃ a, P a) → (¬(∀ x, ¬ P x)) :=
 begin
+assume h,
+assume w,
+cases h with a b,
+apply w a,
+exact b,
 end
 
 
@@ -22,6 +27,11 @@ not every object lacks propery, P, then there must be some
 object that has it. If you try to prove the converse in
 our constructive logic, what happens? Show you work, and
 then briefly but clearly explain exactly what goes wrong.
+
+If you attempt to prove the constructive logic in lean, the converse of this 
+proposition is classically true and doesn't work in constructive logic. The law
+of the excluded middle makes it so that we don't have a variable of type alpha.
+Essentially, it doesn't work because we need classical.em.
 -/
 
 
@@ -35,9 +45,26 @@ answer yes/no then briefly justify your answer.
 ( domain = ℕ, r = {(0,0),(1,1),(2,2)}, co-domain=ℕ )
 
 A. Is this relation reflexive? 
+
+No because every value in the domain has to be reflexive and the domain is all
+natural numbers; we only have 0, 1, 2.
+
 B. Is this relation symmetric? 
+
+Yes because the same number maps to itself in both directions.
+
 C. Is this relation transitive? 
+
+Yes because transitive means r a b → r b c → r a c.
+
 D. Is this relation an equivalence relation? 
+
+No because equivalence :=
+  reflexive r ∧ 
+  symmetric r ∧
+  transitive r
+
+It cannot be an equivalence relation because it is not reflexive.
 -/
 
 
@@ -49,6 +76,12 @@ if, for all values in its domain, a and b, if r a b
 and if r b a then a = b. Give an example of a familiar
 arithmetic relation that's anti-symmetric, and briefly
 explain why it's so.
+
+Anti-Symmetric: r a b → r b a → a = b
+Anti-Symmetric: [Symmetric r] → (a =b)
+
+An arithmetic relation that is anti-symmetric is equivalent because if r a b is
+equivalent and r b a is equivalent, then a and b must be equivalent.
 -/
 
 
@@ -71,6 +104,9 @@ Name a familar arithmetic relation that's asymmetric
 and briefly explain why you think it's asymmetric.
 
 Answer here:
+
+An arithmetic relation that is asymmetric is > because in all cases where a > b,
+then ¬(b>a) is always true.
 -/
 
 /- C: 
@@ -84,6 +120,9 @@ assume that r is asymmetric). Now assume r a a. <finish
 the proof>.
 
 Answer here (rest of proof): 
+
+We have assumed r a a, and our remaining goal is to show ¬ r a a, which is a 
+contradiction.
 -/
 
 /- D.
@@ -101,7 +140,12 @@ example
 ¬ ∃ (a : α), r a a :=
 begin
 -- proof by negation
-
+assume p1,
+cases p1 with a raa,
+unfold is_asymmetric at h,
+have p2 := h a a,
+have nraa := p2 raa,
+contradiction,
 end
 
 
@@ -114,6 +158,11 @@ that α is inhabited.
 
 example (α : Type) (a : α): ¬ is_asymmetric (@eq α) :=
 begin
+unfold is_asymmetric,
+assume asymEQ,
+have p1 := asymEQ a a,
+have neq := p1 rfl,
+contradiction,
 end
 
 /- Extra credit: What exactly goes wrong in a formal 
@@ -121,6 +170,12 @@ proof if you drop the "inhibitedness" condition? Give
 as much of a formal proof as you can then explain why
 it can't be completed (if it can't!).
 -/
+example (α: Type): ¬ is_asymmetric (@eq α) :=
+begin
+unfold is_asymmetric,
+assume asymEQ,
+--There are no values of type α to work with, so it cannot be completed
+--end
 
 
 
@@ -145,6 +200,24 @@ have covered in class.
 
 example : ∀ m : ℕ, equivalence (equiv_mod_m m) :=
 begin
+assume m,
+unfold equivalence equiv_mod_m,
+split,
+unfold reflexive,
+assume n,
+exact rfl,
+split,
+
+unfold symmetric,
+assume x y,
+assume premise,
+rw premise,
+
+unfold transitive,
+assume x y z,
+assume p1 p2,
+rw p1,
+rw p2,
 end
 
 
@@ -161,11 +234,29 @@ the domain is all living persons, and the co-domain
 is all natural numbers.
 
 -- it's a function: 
+
+Yes because it is single-valued.
+
 -- it's total: 
+
+No because not every living person has a US taxpayer ID.
+
 -- it's injective (where "): 
+
+Yes because two people cannot map to the same taxpayer ID.
+
 -- it's surjective (where the co-domain is all ℕ):
+
+No because not every natural number possible taxpayer ID number has a person
+associated with it.
+
 -- it's strictly partial:  
+
+Yes because not every living person has a US taxpayer ID.
+
 -- it's bijective: 
+
+No because it is not surjective.
 -/
 
 
@@ -177,8 +268,16 @@ it have? Explain each answer enough to show you
 know why your answer is correct.
 
 -- reflexive:
+
+No because we cannot assume total since it is empty.
+
 -- symmetric: 
+
+We can assume it is there because we cannot prove a contradictory proof.
+
 -- transitive:
+
+We can assume it is there because we cannot prove a contradictory proof.
 -/
 
 
@@ -233,9 +332,9 @@ S (of objects of some type), is a partial order.
 Pf:  
 Suppose S is a set, with a ⊆ S and b ⊆ S subsets. Then
 
-1. 
-2. 
-3. 
+1. Reflexive, a is a subset of itself.
+2. Anti-symmetric, if a ⊆ b, and b ⊆ a, then it must be true that a = b.
+3. Transitive, if a ⊆ b, and b ⊆ c, then it must be the case that a ⊆ c.
 
 QED.
 -/
@@ -274,6 +373,27 @@ example
   (a b: set α) :
   (a ∪ b)ᶜ = aᶜ ∩ bᶜ := 
 begin
+ext,
+split,
+
+assume notAUB,
+split,
+assume xa,
+have AUB := or.inl xa,
+have f := notAUB AUB,
+contradiction,
+assume xb,
+have AUB := or.inr xb,
+have f := notAUB AUB,
+contradiction,
+
+assume ACBC,
+assume AUB,
+cases AUB with A B,
+have AC := ACBC.left,
+contradiction,
+have BC := ACBC.right,
+contradiction,
 end
 
 

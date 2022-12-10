@@ -71,9 +71,9 @@ natural numbers, that satisfy the pythag_triple,
 predicate, then prove it. (Use "example : ...")
 -/
 
-example : ∃ (x y z : ℕ),
+example : ∃ (x y z : ℕ), pythag_triple x y z :=
 begin
-unfold pythag_triple,
+--unfold pythag_triple,
 apply exists.intro 3,
 apply exists.intro 4,
 apply exists.intro 5,
@@ -260,10 +260,10 @@ example
   (SomeoneKnowsLogic : ∃ (p), KnowsLogic p) :
   (∃ (p : Person), isCool p) :=
 begin
-  assume h,
-  cases h with p lc,
-  cases lc with logic cool,
-  exact exists.intro p cool,
+  cases SomeoneKnowsLogic with w xt,
+  show ∃ (p : Person), isCool p,
+  apply exists.intro w,
+  apply LogicMakesCool w xt,
 end
 
 
@@ -276,14 +276,16 @@ someone is not happy then not everyone is happy.
 example 
   (Person : Type)
   (Happy : Person → Prop) :
-  (∃ (p : Person), ¬Happy p)
+  (∃ (p), ¬(Happy p)) → 
+  (¬ (∀ (p), Happy p))
   :=
 begin
   --apply exists.intro,
-  assume h,
-  cases h with p,
-  cases nh with notHappy,
-  apply exists.intro p notHappy,
+  intros h,
+  cases h with w wnh,
+  assume ah,
+  let wnh := ah w,
+  contradiction,
 end
 
 /- #3C
@@ -306,14 +308,22 @@ your set of assumptions.
 example 
   (α : Type)
   (P : α → Prop) :
-  (∃ (p : α), P p) ↔  
-  (¬∃ (q : α), ¬P q) :=
+  (∀ (x), P x) ↔ 
+  (¬ ∃ (x), ¬ P x) :=
 begin
-  apply exists.intro,
+  apply iff.intro,
   assume h,
+  assume nh,
+  show false,
+  cases nh with s snh,
+  apply snh (h s),
+  assume un,
+  show ∀ (x : α), P x,
+  assume y,
+  cases (classical.em (P y)) with ph pnh,
+  assumption,
+  let nh := (exists.intro y pnh),
   contradiction,
-  apply exists.intro,
-  exact p,
 end 
 
 
@@ -331,11 +341,15 @@ taking objects of that type.
 example 
   (T : Type)
   (P : T → Prop) :
-  (¬∃ (t : T), ¬P t) :=
+  (¬∃ (t), P t) → 
+  ∀ (t), ¬(P t) :=
 begin
-  apply exists.intro,
-  assume h,
-  exact P,
+  intros h,
+  assume t,
+  assume pt,
+  show false,
+  let ex_x_Px := exists.intro t pt,
+  contradiction,
 end
 
 
@@ -351,11 +365,15 @@ example
   (α : Type)
   (P : α → Prop)
   (Q : α → Prop): 
-  (∃ (p : α), P ∨ Q p) :=
+  (∃ (y), (P y) ∨ (Q y)) →
+  (∃ (y), P y) ∨ (∃ (y), Q y) :=
 begin
-  ring,
-  apply exists.intro,
   assume h,
-  exact p,
+  cases h with w pworqw,
+  cases pworqw with pw qw,
+  left,
+  exact (exists.intro w pw),
+  right,   
+  exact (exists.intro w qw),
 end
 
